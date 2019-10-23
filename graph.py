@@ -43,8 +43,8 @@ class ProteinGraph:
         for chain in self.chains:
             matrix = [[0 for _ in range(len(chain))] for _ in range(len(chain))]
             for i in range(0, len(chain)-1):
-                matrix[i][i+1] = 1
-                matrix[i+1][i] = 1
+                # matrix[i][i+1] = 1
+                # matrix[i+1][i] = 1
                 if ((i+chain[i].nh_bonded)<len(chain)) and ((i+chain[i].nh_bonded)>=0):
                    matrix[i][i+chain[i].nh_bonded] = 1
                    matrix[i+chain[i].nh_bonded][i] = 1
@@ -68,6 +68,7 @@ class ProteinGraph:
                         temp_j += 1
                     if len_run >= 4:
                         while j+4<len_chain and matrix[j][j+4]==1:
+                            matrix[j][j+4] = 1
                             curr_chain[j].predicted_2d = 'H'
                             j += 1
                         curr_chain[j].predicted_2d = 'H'
@@ -83,6 +84,7 @@ class ProteinGraph:
                         temp_j += 1
                     if len_run >= 3:
                         while j+3<len_chain and matrix[j][j+3]==1:
+                            matrix[j][j+4] = 2
                             curr_chain[j].predicted_2d = 'G'
                             j += 1
                         curr_chain[j].predicted_2d = 'G'
@@ -97,6 +99,7 @@ class ProteinGraph:
                         temp_j += 1
                     if len_run >= 5:
                         while j+5<len_chain and matrix[j][j+5]==1:
+                            matrix[j][j+5] = 3
                             curr_chain[j].predicted_2d = 'I'
                             j += 1
                         curr_chain[j].predicted_2d = 'I'
@@ -126,19 +129,23 @@ class ProteinGraph:
                         temp_k = k
                         while temp_j >= 0 and temp_k < len_chain:
                             if matrix[temp_j][temp_k] == 1:
+                                matrix[temp_j][temp_k] = 4
                                 curr_chain[temp_j].predicted_2d = 'E'
                                 curr_chain[temp_k].predicted_2d = 'E'
                                 temp_j -= 1
                                 temp_k += 1
                             elif matrix[temp_j][temp_k-1] == 1:
+                                matrix[temp_j][temp_k] = 4
                                 curr_chain[temp_j].predicted_2d = 'E'
                                 curr_chain[temp_k].predicted_2d = 'E'
                                 temp_j -= 1
                             elif matrix[temp_j+1][temp_k] == 1:
+                                matrix[temp_j][temp_k] = 4
                                 curr_chain[temp_j].predicted_2d = 'E'
                                 curr_chain[temp_k].predicted_2d = 'E'
                                 temp_k += 1
                             elif matrix[temp_j-1][temp_k+1] == 1:
+                                matrix[temp_j][temp_k] = 4
                                 curr_chain[temp_j].predicted_2d = 'E'
                                 curr_chain[temp_k].predicted_2d = 'E'
                                 temp_j -= 1
@@ -176,6 +183,16 @@ ptn = ProteinGraph("/Users/mayurarvind/ptn.dssp")
 # print(len(ptn.chains[0]))
 ptn.predict2Dhelices()
 ptn.predict2Dbeta()
+f = open("matrix.txt", "w")
+for matrix in ptn.adjacency_matrices:
+    for row in matrix:
+        for col in row:
+            f.write(str(col))
+        f.write('\n')
+    f.write('\n\n')
+
+# f.write(ptn.adjacency_matrices)
+f.close()
 for i in range(len(ptn.chains[0])):
     print(str(i+1) + " " + str(ptn.chains[0][i].predicted_2d))
 # for chain in ptn.chains:
